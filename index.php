@@ -7,10 +7,8 @@ $dotenv = new \Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 $dotenv->required(['GOOGLE_CALENDAR_ICS_URI']);
 
-
 /* File path or url of the .ics document */
 $file = getenv("GOOGLE_CALENDAR_ICS_URI");
-
 
 /* Getting events from isc file */
 $calendar = new CranleighSchool\AnnualLeave\parseIcs($file);
