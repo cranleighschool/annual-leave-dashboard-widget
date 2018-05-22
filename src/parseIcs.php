@@ -27,7 +27,7 @@ class parseIcs
     function getIcsEventsAsArray()
     {
         $icalString = file_get_contents($this->file);
-        $icsDates = [];
+        $icsDates = array();
         /* Explode the ICs Data to get datas as array according to string ‘BEGIN:’ */
         $icsData = explode("BEGIN:", $icalString);
         /* Iterating the icsData value to make all the start end dates as sub array */
@@ -62,7 +62,7 @@ class parseIcs
     function sortEvents($input)
     {
 
-        $events = [];
+        $events = array();
 
         foreach ($input as $item) {
             if (trim($item['BEGIN']) === "VCALENDAR") {
@@ -75,7 +75,7 @@ class parseIcs
                 $events[] = $event;
             }
         }
-        usort($events, [$this, 'sorter']);
+        usort($events, array($this, 'sorter'));
 
         return array_slice($events, 0, 12, true);
     }

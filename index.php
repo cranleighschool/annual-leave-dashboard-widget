@@ -5,7 +5,7 @@ require_once 'vendor/autoload.php';
 /* Load .env */
 $dotenv = new \Dotenv\Dotenv(__DIR__);
 $dotenv->load();
-$dotenv->required(['GOOGLE_CALENDAR_ICS_URI']);
+$dotenv->required(array('GOOGLE_CALENDAR_ICS_URI'));
 
 /* File path or url of the .ics document */
 $file = getenv("GOOGLE_CALENDAR_ICS_URI");
