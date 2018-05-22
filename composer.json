@@ -1,0 +1,17 @@
+{
+    "name": "fredbradley/annual-leave-widget",
+    "authors": [
+        {
+            "name": "Fred Bradley",
+            "email": "hello@fredbradley.co.uk"
+        }
+    ],
+	"autoload": {
+		"psr-4": {
+			"CranleighSchool\\AnnualLeave\\": "src"
+		}
+	},
+    "require": {
+        "vlucas/phpdotenv": "^2.4"
+    }
+}
