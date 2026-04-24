@@ -32,7 +32,9 @@ class parseIcs
         $icsData = explode("BEGIN:", $icalString);
         /* Iterating the icsData value to make all the start end dates as sub array */
         foreach ($icsData as $key => $value) {
-            $icsDatesMeta [$key] = explode("\n", $value);
+            if (substr($value, 0, 6) === 'VEVENT') {
+                $icsDatesMeta [$key] = explode("\n", $value);
+            }
         }
         /* Itearting the Ics Meta Value */
         foreach ($icsDatesMeta as $key => $value) {
@@ -41,6 +43,10 @@ class parseIcs
                 $icsDates = $this->getICSDates($key, $subKey, $subValue, $icsDates);
             }
         }
+//        echo '<pre>';
+//        var_dump($icsDates);
+//        echo '</pre>';
+//        die();
 
         return $this->sortEvents($icsDates);
     }
@@ -61,16 +67,17 @@ class parseIcs
 
     function sortEvents($input)
     {
+     //   die(print_r($input));
 
         $events = array();
 
         foreach ($input as $item) {
             if (trim($item['BEGIN']) === "VCALENDAR") {
                 $this->getTimezone($item);
-                continue;
+                break;
             }
 
-            $event = new icsEvent($item, $this->timezone);
+            $event = new icsEvent($item, "Europe/London");
             if ($event->end_timestamp > $event->time_now) {
                 $events[] = $event;
             }
@@ -84,6 +91,10 @@ class parseIcs
     {
         if (isset($item['X-WR-TIMEZONE'])) {
             $this->timezone = trim($item['X-WR-TIMEZONE']);
+        } elseif (isset($item['X-LIC-LOCATION'])) {
+            $this->timezone = trim($item['X-LIC-LOCATION']);
+        } else {
+            $this->timezone = "Europe/London";
         }
     }
 

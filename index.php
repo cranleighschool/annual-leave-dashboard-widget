@@ -1,6 +1,8 @@
 <?php
-
+//ini_set('display_errors', 1);
+//ini_set('error_reporting', -1);
 require_once 'vendor/autoload.php';
+
 
 /* Load .env */
 $dotenv = new \Dotenv\Dotenv(__DIR__);
@@ -12,7 +14,6 @@ $file = getenv("GOOGLE_CALENDAR_ICS_URI");
 
 /* Getting events from isc file */
 $calendar = new CranleighSchool\AnnualLeave\parseIcs($file);
-echo '<h3 class="widgettitle">Annual Leave</h3>';
 echo '<div class="leavedatablock">';
 echo $calendar->displayTable();
 echo '</div>';

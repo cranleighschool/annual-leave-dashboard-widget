@@ -27,7 +27,6 @@ class icsEvent
 
     public function __construct($item, $timezone)
     {
-
         $item = array_map('trim', $item);
 
         if (isset($item['DTSTART;VALUE=DATE'])) {
@@ -40,6 +39,7 @@ class icsEvent
             $this->end_time = ($item['DTEND']);
         }
         $this->title = ($item['SUMMARY']);
+        error_log(print_r($timezone, true));
         $this->timezone = $timezone;
 
         $startDt = new DateTime ($this->start_time);
