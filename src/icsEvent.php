@@ -1,99 +1,89 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CranleighSchool\AnnualLeave;
 
 use DateTime;
-use DateTimezone;
+use DateTimeZone;
 
-class icsEvent
+readonly class IcsEvent
 {
-    public $timezone;
+    public string $timezone;
 
-    public $title;
+    public string $title;
 
-    public $start_timestamp;
+    public int $startTimestamp;
 
-    public $readable_start;
+    public string $readableStart;
 
-    public $end_timestamp;
+    public int $endTimestamp;
 
-    public $readable_end;
+    public string $readableEnd;
 
-    private $allDayEvent;
+    public int $timeNow;
 
-    private $start_time;
+    private bool $allDayEvent;
 
-    private $end_time;
-
-    public function __construct($item, $timezone)
+    /**
+     * @param array<string, string> $item
+     * @param string $timezone
+     */
+    public function __construct(array $item, string $timezone)
     {
         $item = array_map('trim', $item);
 
+        $this->timezone = $timezone;
+        $this->title = $item['SUMMARY'] ?? '';
+        $this->timeNow = time();
+
+        // Determine if all-day event
         if (isset($item['DTSTART;VALUE=DATE'])) {
             $this->allDayEvent = true;
-            $this->start_time = ($item['DTSTART;VALUE=DATE']);
-            $this->end_time = ($item['DTEND;VALUE=DATE']);
-        } elseif (isset($item['DTSTART'])) {
-            $this->allDayEvent = false;
-            $this->start_time = ($item['DTSTART']);
-            $this->end_time = ($item['DTEND']);
-        }
-        $this->title = ($item['SUMMARY']);
-        error_log(print_r($timezone, true));
-        $this->timezone = $timezone;
-
-        $startDt = new DateTime ($this->start_time);
-        $startDt->setTimeZone(new DateTimezone ($this->timezone));
-        $this->start_timestamp = $startDt->getTimestamp();
-
-        if ($this->allDayEvent === true) {
-            $this->readable_start = $startDt->format("d M");
+            $startTime = $item['DTSTART;VALUE=DATE'];
+            $endTime = $item['DTEND;VALUE=DATE'];
         } else {
-            $this->readable_start = $this->formatMinutesOut($startDt->format("d M g:ia"));
+            $this->allDayEvent = false;
+            $startTime = $item['DTSTART'] ?? '';
+            $endTime = $item['DTEND'] ?? '';
         }
 
-        $endDt = new DateTime($this->end_time);
-        $endDt->setTimeZone(new DateTimeZone($this->timezone));
-        $this->end_timestamp = $endDt->getTimestamp() - 1; // Minus 1 millisecond to push into 'yesterday'
+        // Parse start date/time
+        $startDt = new DateTime($startTime);
+        $startDt->setTimeZone(new DateTimeZone($this->timezone));
+        $this->startTimestamp = $startDt->getTimestamp();
 
-        if ($this->allDayEvent === true) {
-            $this->end_timestamp = $endDt->getTimestamp() - 1;
-            $this->readable_end = date("d M", $this->end_timestamp);
+        if ($this->allDayEvent) {
+            $this->readableStart = $startDt->format("d M");
+        } else {
+            $this->readableStart = $this->formatTime($startDt->format("d M g:ia"));
+        }
+
+        // Parse end date/time
+        $endDt = new DateTime($endTime);
+        $endDt->setTimeZone(new DateTimeZone($this->timezone));
+        $this->endTimestamp = $endDt->getTimestamp() - 1; // Minus 1 second to account for all-day event boundaries
+
+        if ($this->allDayEvent) {
+            $this->readableEnd = date("d M", $this->endTimestamp);
         } else {
             if ($endDt->format("d M") === $startDt->format("d M")) {
-                $this->readable_end = $this->formatMinutesOut($endDt->format("g:ia"));
+                $this->readableEnd = $this->formatTime($endDt->format("g:ia"));
             } else {
-                $this->readable_end = $this->formatMinutesOut($endDt->format("d M g:ia"));
+                $this->readableEnd = $this->formatTime($endDt->format("d M g:ia"));
             }
         }
-
-        $this->html = $this->setDisplay();
-        $this->time_now = time();
     }
 
-    public function formatMinutesOut($input)
+    /**
+     * Format time string by removing ":00" minutes when on the hour
+     */
+    private function formatTime(string $input): string
     {
-        if (strpos($input, ":00")) {
-            $parts = explode(":00", $input);
-
-            return implode("", $parts);
+        if (str_contains($input, ":00")) {
+            return str_replace(":00", "", $input);
         }
 
         return $input;
-    }
-
-    private function setDisplay()
-    {
-        $class = "";
-        if (time() < ($this->end_timestamp) && time() > $this->start_timestamp) {
-            $class = "today";
-        }
-        if ($this->readable_start === $this->readable_end) {
-            $date = $this->readable_start;
-        } else {
-            $date = $this->readable_start.'-'.$this->readable_end;
-        }
-
-        return '<tr class="'.$class.'"><td><span class="the_date">'.$date.': </span>'.$this->title.'</td></tr>';
     }
 }
