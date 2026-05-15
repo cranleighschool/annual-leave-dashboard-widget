@@ -54,9 +54,9 @@ readonly class IcsEvent
         $this->startTimestamp = $startDt->getTimestamp();
 
         if ($this->allDayEvent) {
-            $this->readableStart = $startDt->format("d M");
+            $this->readableStart = $startDt->format("D d M");
         } else {
-            $this->readableStart = $this->formatTime($startDt->format("d M g:ia"));
+            $this->readableStart = $this->formatTime($startDt->format("D d M g:ia"));
         }
 
         // Parse end date/time
@@ -65,7 +65,7 @@ readonly class IcsEvent
         $this->endTimestamp = $endDt->getTimestamp() - 1; // Minus 1 second to account for all-day event boundaries
 
         if ($this->allDayEvent) {
-            $this->readableEnd = date("d M", $this->endTimestamp);
+            $this->readableEnd = date("D d M", $this->endTimestamp);
         } else {
             if ($endDt->format("d M") === $startDt->format("d M")) {
                 $this->readableEnd = $this->formatTime($endDt->format("g:ia"));
